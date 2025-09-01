@@ -252,3 +252,20 @@ textarea{
   background: linear-gradient(180deg, rgba(230,255,240,.95), rgba(200,245,220,.9));
   border: 1px solid rgba(0,180,100,.35);
 }
+
+/* iPhone/iPad fix: ensure board clears the sticky header + safe area */
+@supports (-webkit-touch-callout: none) {
+  html { scroll-padding-top: var(--header-h); }
+
+  .board-wrap{
+    /* extra top padding for the header + notch */
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    /* reduce the viewport height by header + notch so nothing hides under it */
+    height: calc(100vh - var(--header-h) - env(safe-area-inset-top, 0px));
+  }
+}
+
+/* Optional: a bit more headroom on tablets */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .board-wrap{ padding-top: calc(28px + env(safe-area-inset-top, 0px)); }
+}
