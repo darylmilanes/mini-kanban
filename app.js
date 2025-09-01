@@ -326,6 +326,7 @@
     if(pendingDeleteId){
       trulyDeleteCard(pendingDeleteId);
       pendingDeleteId = null;
+      closeSheet(); // Ensure card editor closes after deletion
     }
     closeConfirm();
   });
