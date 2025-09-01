@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+  <title>Micro Kanban Board</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="appbar">
+    <div class="appbar-inner">
+      <div class="brand">
+        <div class="dot" aria-hidden="true"></div>
+        <div>
+          <h1>Micro Kanban</h1>
+          <small>Lightweight, offline, instant</small>
+        </div>
+      </div>
+
+      <div class="progress">
+        <div class="row">
+          <b id="progressText">0 of 0 done</b>
+          <span id="progressPct" class="soft">0%</span>
+        </div>
+        <div class="meter"><div class="bar" id="progressBar"></div></div>
+      </div>
+
+      <div class="tools">
+        <button class="btn ghost" id="addColumnBtn" title="Add category">Add Category</button>
+        <button class="btn" id="exportBtn" title="Export board as JSON">Export</button>
+        <input type="file" accept="application/json" id="importInput" style="display:none" />
+        <button class="btn" id="importBtn" title="Import board from JSON">Import</button>
+        <button class="btn icon" id="clearBtn" title="Clear all data" aria-label="Clear all">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6v12m8-12v12M5 6l1-3h12l1 3M6 6h12l-1 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 6z"/></svg>
+        <button class="btn icon" id="helpBtn" title="Quick Guide">?</button>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="board-wrap">
+    <section id="board" class="board" aria-label="Kanban board"></section>
+  </main>
+
+  <button class="fab" id="fab" aria-label="Add task">+</button>
+
+  <!-- Add/Edit Task Sheet -->
+  <div class="modal" id="modal">
+    <div class="sheet">
+      <h3 id="sheetTitle">New Task</h3>
+      <div class="form">
+        <div class="row">
+          <label for="taskTitle">Title</label>
+          <input id="taskTitle" type="text" placeholder="What needs to be done?" />
+        </div>
+        <div class="row cols">
+          <div>
+            <label for="taskDue">Due date (optional)</label>
+            <input id="taskDue" type="date" />
+          </div>
+          <div>
+            <label for="taskTime">Time (optional)</label>
+            <input id="taskTime" type="time" />
+          </div>
+        </div>
+        <div class="row">
+          <label for="taskColumn">Category</label>
+          <select id="taskColumn"></select>
+        </div>
+        <div class="row">
+          <label for="taskTags">Tags (comma-separated, optional)</label>
+          <input id="taskTags" type="text" placeholder="e.g., design, urgent" />
+        </div>
+        <div class="row">
+          <label for="taskNotes">Notes (optional)</label>
+          <textarea id="taskNotes" placeholder="Details"></textarea>
+        </div>
+        <div class="row">
+          <label for="taskColor">Card color (optional)</label>
+          <input id="taskColor" type="color" value="#ffffff" />
+        </div>
+        <div class="actions">
+          <button class="btn danger left" id="deleteCardBtn" style="display:none">Delete</button>
+          <span class="spacer"></span>
+          <button class="btn" id="cancelAdd">Cancel</button>
+          <button class="btn primary" id="saveAdd">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm Delete -->
+  <div class="modal" id="confirmModal">
+    <div class="confirm">
+      <h3>Delete card?</h3>
+      <p>This action can’t be undone.</p>
+      <div class="actions">
+        <button class="btn" id="confirmCancel">Cancel</button>
+        <button class="btn danger" id="confirmDelete">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Guide (first-load help) -->
+  <div class="modal" id="helpModal" aria-labelledby="helpTitle" aria-modal="true" role="dialog">
+    <div class="help-panel" role="document">
+      <h3 id="helpTitle">Kanban — Quick Guide (MUST READ)</h3>
+
+      <h4>Getting started</h4>
+      <ul>
+        <li>The board opens with four categories: To-Do, Doing, Done, and Floating.</li>
+        <li>Add tasks from any column header via + Task.</li>
+        <li>Edit any task by clicking it.</li>
+      </ul>
+
+      <h4>Tasks</h4>
+      <ul>
+        <li>Title is required. Due date, time, tags, notes, and card color are optional.</li>
+        <li>Past dates are blocked. Overdue tasks are highlighted.</li>
+        <li>Tags are comma-separated (e.g., design, urgent).</li>
+        <li>Delete a task from the edit sheet, or drag it outside all columns (you’ll be asked to confirm).</li>
+      </ul>
+
+      <h4>Drag &amp; reorder</h4>
+      <ul>
+        <li>Drag cards to reorder or move across categories.</li>
+        <li>Drag a column header (or the grip) to reorder columns.</li>
+        <li>Auto-scroll kicks in near the left/right edges while dragging.</li>
+      </ul>
+
+      <h4>Progress bar</h4>
+      <ul>
+        <li>Progress shows Done / All and excludes the Floating column.</li>
+        <li>Rename columns any time; progress detects “Done” and “Floating” by name.</li>
+      </ul>
+
+      <h4>Columns</h4>
+      <ul>
+        <li>Add Category creates a new column.</li>
+        <li>Rename by clicking the column title.</li>
+        <li>Delete removes the column and all cards in it.</li>
+      </ul>
+
+      <h4>Import / Export</h4>
+      <ul>
+        <li>Export saves a JSON snapshot of your board.</li>
+        <li>Import loads a JSON file and replaces the current board.</li>
+      </ul>
+
+      <h4>For backups, export regularly.</h4>
+      <ul>
+        <li><strong>Storage &amp; privacy</strong></li>
+        <li>All data is saved locally in your browser (localStorage).</li>
+        <li>No accounts, no sync, no server—clearing site data or using a different browser/device will start you fresh.</li>
+      </ul>
+
+      <h4>Keyboard &amp; mouse tips</h4>
+      <ul>
+        <li>Hold Shift while scrolling to pan horizontally.</li>
+        <li>Shift + Arrow keys pan the board stepwise.</li>
+        <li>In the task sheet, Cmd/Ctrl + Enter saves.</li>
+      </ul>
+
+      <h4>Mobile notes</h4>
+      <ul>
+        <li>Headers and controls are touch-friendly.</li>
+        <li>Long-press briefly to start a drag on touch devices.</li>
+      </ul>
+
+      <h4>Limitations</h4>
+      <ul>
+        <li>No multi-device sync or collaboration for now.</li>
+        <li>Large boards may feel slower on low-power devices.</li>
+        <li>Importing overwrites the current board.</li>
+      </ul>
+
+      <p class="dismiss-note">Need to close this help?<br>Click anywhere outside this panel to dismiss.</p>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
