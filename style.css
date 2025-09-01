@@ -256,7 +256,7 @@ textarea{
 /* iPhone */
 @media (max-width: 600px){
   .board-wrap{
-    padding-top: calc(80px + env(safe-area-inset-top, 0px)) !important; /* adjust 40px */
+    padding-top: calc(100px + env(safe-area-inset-top, 0px)) !important; /* adjust 40px */
     height: calc(100vh - var(--header-h) - env(safe-area-inset-top, 0px));
   }
 }
